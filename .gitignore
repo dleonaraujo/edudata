@@ -1,3 +1,19 @@
+# Entorno virtual
+venv/
+
+# Variables de entorno
+.env
+
+# Modelo ML (si es muy pesado)
+ml/modelos/*.pkl
+
+# Datos sensibles
+data/*.csv
+
+# Django
+*.pyc
+__pycache__/
+db.sqlite3
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
