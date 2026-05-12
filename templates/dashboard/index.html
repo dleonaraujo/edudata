@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>EduData - Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f4f8; color: #333; min-height: 100vh; }
+        
+        .navbar { background: #2c6e8a; padding: 15px 30px; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .navbar h1 { font-size: 1.4em; }
+        .navbar a { color: white; text-decoration: none; margin-left: 20px; }
+        
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        
+        .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .card { background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .card h3 { font-size: 2em; color: #2c6e8a; }
+        .card p { color: #666; font-size: 0.9em; }
+
+        .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .chart-box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .chart-box h2 { color: #2c6e8a; margin-bottom: 15px; font-size: 1em; }
+        
+        .btn { background: #2c6e8a; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <h1>🎓 EduData - Arequipa</h1>
+    <div>
+        <a href="/dashboard/">Dashboard</a>
+        <a href="/predecir/">Predictor</a>
+        <a href="/admin/">Admin</a>
+    </div>
+</div>
+
+<div class="container">
+    
+    <div class="cards">
+        <div class="card">
+            <h3>{{ total_provincias }}</h3>
+            <p>Provincias</p>
+        </div>
+        <div class="card">
+            <h3>{{ total_alumnos|floatformat:0 }}</h3>
+            <p>Alumnos 2025</p>
+        </div>
+        <div class="card">
+            <h3>{{ total_docentes|floatformat:0 }}</h3>
+            <p>Docentes 2025</p>
+        </div>
+        <div class="card">
+            <h3>{{ ratio_promedio }}</h3>
+            <p>Ratio Promedio</p>
+        </div>
+    </div>
+
+    <div class="charts">
+        <div class="chart-box">
+            <h2>📊 Matrícula por Provincia (2025)</h2>
+            <canvas id="chartMatricula"></canvas>
+        </div>
+        <div class="chart-box">
+            <h2>📈 Ratio Alumno/Docente por Provincia</h2>
+            <canvas id="chartRatio"></canvas>
+        </div>
+        <div class="chart-box">
+            <h2>📉 Evolución de Matrícula (2022-2025)</h2>
+            <canvas id="chartEvolucion"></canvas>
+        </div>
+        <div class="chart-box">
+            <h2>🔴 Nivel de Riesgo por Provincia (2025)</h2>
+            <canvas id="chartRiesgo"></canvas>
+        </div>
+    </div>
+
+    <br>
+    <a href="/predecir/" class="btn">🔮 Ir al Predictor</a>
+
+</div>
+
+<script>
+    const provincias = {{ provincias_json|safe }};
+    const matriculas = {{ matriculas_json|safe }};
+    const ratios = {{ ratios_json|safe }};
+    const riesgos = {{ riesgos_json|safe }};
+    const evolucion = {{ evolucion_json|safe }};
+
+    // Gráfico 1: Matrícula por provincia
+    new Chart(document.getElementById('chartMatricula'), {
+        type: 'bar',
+        data: {
+            labels: provincias,
+            datasets: [{
+                label: 'Alumnos',
+                data: matriculas,
+                backgroundColor: '#2c6e8a'
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+
+    // Gráfico 2: Ratio por provincia
+    new Chart(document.getElementById('chartRatio'), {
+        type: 'bar',
+        data: {
+            labels: provincias,
+            datasets: [{
+                label: 'Ratio',
+                data: ratios,
+                backgroundColor: ratios.map(r => r > 14 ? '#e74c3c' : '#2ecc71')
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+
+    // Gráfico 3: Evolución
+    new Chart(document.getElementById('chartEvolucion'), {
+        type: 'line',
+        data: {
+            labels: evolucion.anios,
+            datasets: evolucion.series.map((s, i) => ({
+                label: s.provincia,
+                data: s.datos,
+                borderColor: `hsl(${i * 45}, 70%, 50%)`,
+                fill: false,
+                tension: 0.3
+            }))
+        },
+        options: { responsive: true }
+    });
+
+    // Gráfico 4: Riesgo (dona)
+    new Chart(document.getElementById('chartRiesgo'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Alto Riesgo', 'Bajo Riesgo'],
+            datasets: [{
+                data: riesgos,
+                backgroundColor: ['#e74c3c', '#2ecc71']
+            }]
+        },
+        options: { responsive: true }
+    });
+</script>
+
+</body>
+</html>

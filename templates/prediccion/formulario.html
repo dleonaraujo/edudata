@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>EduData - Predicción de Deserción</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        h1 { color: #2c6e8a; }
+        input { width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #2c6e8a; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; width: 100%; }
+        button:hover { background: #1a4f63; }
+        #resultado { margin-top: 20px; padding: 15px; border-radius: 8px; display: none; }
+        .alto { background: #ffe0e0; border: 2px solid red; }
+        .bajo { background: #e0ffe0; border: 2px solid green; }
+    </style>
+</head>
+<body>
+    <h1>🎓 EduData - Predictor de Deserción Escolar</h1>
+    <p>Ingresa los indicadores de una provincia de Arequipa:</p>
+
+    <label>Total Docentes:</label>
+    <input type="number" id="docentes" placeholder="Ej: 1249">
+
+    <label>Total Matrícula:</label>
+    <input type="number" id="matricula" placeholder="Ej: 19827">
+
+    <label>Ratio Alumno/Docente:</label>
+    <input type="number" step="0.01" id="ratio" placeholder="Ej: 15.87">
+
+    <button onclick="predecir()">Predecir Riesgo</button>
+
+    <div id="resultado"></div>
+
+    <script>
+        async function predecir() {
+            const docentes = parseFloat(document.getElementById('docentes').value);
+            const matricula = parseFloat(document.getElementById('matricula').value);
+            const ratio = parseFloat(document.getElementById('ratio').value);
+
+            const response = await fetch('/predecir/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    docentes: docentes,
+                    matricula: matricula,
+                    ratio_alumno_docente: ratio
+                })
+            });
+
+            const data = await response.json();
+            const div = document.getElementById('resultado');
+            div.style.display = 'block';
+            div.className = data.riesgo === 'Alto' ? 'alto' : 'bajo';
+            div.innerHTML = `
+                <h2>Resultado: ${data.riesgo === 'Alto' ? '🔴 Alto Riesgo' : '🟢 Bajo Riesgo'}</h2>
+                <p>Probabilidad Alto Riesgo: <strong>${data.probabilidad_alto}%</strong></p>
+                <p>Probabilidad Bajo Riesgo: <strong>${data.probabilidad_bajo}%</strong></p>
+            `;
+        }
+    </script>
+</body>
+</html>
