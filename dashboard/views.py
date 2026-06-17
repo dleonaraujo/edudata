@@ -33,3 +33,31 @@ def index(request):
         'evolucion_json': json.dumps({'anios': anios, 'series': series}),
     }
     return render(request, 'dashboard/index.html', context)
+
+def comparativo(request):
+    from datos.models import IndicadorDistrito
+    import json
+
+    todos = IndicadorDistrito.objects.all().values(
+        'provincia', 'anio', 'total_alumnos', 
+        'total_docentes', 'ratio_alumno_docente'
+    )
+    
+    datos = []
+    for d in todos:
+        datos.append({
+            'provincia': d['provincia'],
+            'anio': d['anio'],
+            'total_alumnos': d['total_alumnos'],
+            'total_docentes': d['total_docentes'],
+            'ratio': d['ratio_alumno_docente']
+        })
+
+    provincias = list(IndicadorDistrito.objects.values_list(
+        'provincia', flat=True
+    ).distinct().order_by('provincia'))
+
+    return render(request, 'dashboard/comparativo.html', {
+        'provincias': provincias,
+        'datos_json': json.dumps(datos)
+    })

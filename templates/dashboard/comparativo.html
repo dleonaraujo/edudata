@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>EduData - Comparativo</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f4f8; }
+        .navbar { background: #2c6e8a; padding: 15px 30px; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .navbar h1 { font-size: 1.4em; }
+        .navbar a { color: white; text-decoration: none; margin-left: 20px; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .filtros { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; gap: 20px; align-items: flex-end; }
+        .filtros select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        .filtros label { font-size: 13px; color: #666; display: block; margin-bottom: 4px; }
+        .btn { background: #2c6e8a; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .chart-box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .chart-box h2 { color: #2c6e8a; margin-bottom: 15px; font-size: 1em; }
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .stat-card h3 { font-size: 1.8em; color: #2c6e8a; }
+        .stat-card p { color: #666; font-size: 0.85em; }
+        .prov1 { color: #2c6e8a; }
+        .prov2 { color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <h1>🎓 EduData - Arequipa</h1>
+    <div>
+        <a href="/dashboard/">Dashboard</a>
+        <a href="/comparativo/">Comparativo</a>
+        <a href="/predecir/">Predictor</a>
+        <a href="/admin/">Admin</a>
+    </div>
+</div>
+
+<div class="container">
+    <h2 style="margin-bottom:20px; color:#2c6e8a;">📊 Análisis Comparativo entre Provincias</h2>
+
+    <div class="filtros">
+        <div>
+            <label>Provincia 1:</label>
+            <select id="prov1">
+                {% for p in provincias %}
+                <option value="{{ p }}">{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>Provincia 2:</label>
+            <select id="prov2">
+                {% for p in provincias %}
+                <option value="{{ p }}" {% if forloop.counter == 2 %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>Año:</label>
+            <select id="anio">
+                <option value="2022">2022</option>
+                <option value="2023">2023</option>
+                <option value="2024">2024</option>
+                <option value="2025" selected>2025</option>
+            </select>
+        </div>
+        <button class="btn" onclick="comparar()">Comparar</button>
+    </div>
+
+    <div id="resultado" style="display:none;">
+        <div class="stats" id="stats"></div>
+        <div class="charts">
+            <div class="chart-box">
+                <h2>📈 Matrícula y Docentes</h2>
+                <canvas id="chartBarras"></canvas>
+            </div>
+            <div class="chart-box">
+                <h2>⚖️ Ratio Alumno/Docente</h2>
+                <canvas id="chartRatio"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const datos = {{ datos_json|safe }};
+    let chart1 = null, chart2 = null;
+
+    function comparar() {
+        const p1 = document.getElementById('prov1').value;
+        const p2 = document.getElementById('prov2').value;
+        const anio = document.getElementById('anio').value;
+
+        const d1 = datos.find(d => d.provincia === p1 && d.anio === parseInt(anio));
+        const d2 = datos.find(d => d.provincia === p2 && d.anio === parseInt(anio));
+
+        if (!d1 || !d2) { alert('No hay datos para esa combinación'); return; }
+
+        document.getElementById('resultado').style.display = 'block';
+
+        // Stats
+        document.getElementById('stats').innerHTML = `
+            <div class="stat-card">
+                <h3 class="prov1">${d1.total_alumnos.toLocaleString()}</h3>
+                <p>Alumnos ${p1}</p>
+                <h3 class="prov2">${d2.total_alumnos.toLocaleString()}</h3>
+                <p>Alumnos ${p2}</p>
+            </div>
+            <div class="stat-card">
+                <h3 class="prov1">${d1.total_docentes.toLocaleString()}</h3>
+                <p>Docentes ${p1}</p>
+                <h3 class="prov2">${d2.total_docentes.toLocaleString()}</h3>
+                <p>Docentes ${p2}</p>
+            </div>
+            <div class="stat-card">
+                <h3 class="prov1" style="color:${d1.ratio > 14 ? '#e74c3c' : '#27ae60'}">${d1.ratio}</h3>
+                <p>Ratio ${p1} ${d1.ratio > 14 ? '🔴 Alto' : '🟢 Bajo'}</p>
+                <h3 class="prov2" style="color:${d2.ratio > 14 ? '#e74c3c' : '#27ae60'}">${d2.ratio}</h3>
+                <p>Ratio ${p2} ${d2.ratio > 14 ? '🔴 Alto' : '🟢 Bajo'}</p>
+            </div>
+        `;
+
+        // Gráfico barras
+        if (chart1) chart1.destroy();
+        chart1 = new Chart(document.getElementById('chartBarras'), {
+            type: 'bar',
+            data: {
+                labels: ['Alumnos', 'Docentes'],
+                datasets: [
+                    { label: p1, data: [d1.total_alumnos, d1.total_docentes], backgroundColor: '#2c6e8a' },
+                    { label: p2, data: [d2.total_alumnos, d2.total_docentes], backgroundColor: '#e74c3c' }
+                ]
+            },
+            options: { responsive: true }
+        });
+
+        // Gráfico ratio
+        if (chart2) chart2.destroy();
+        chart2 = new Chart(document.getElementById('chartRatio'), {
+            type: 'bar',
+            data: {
+                labels: [p1, p2],
+                datasets: [{
+                    label: 'Ratio Alumno/Docente',
+                    data: [d1.ratio, d2.ratio],
+                    backgroundColor: [
+                        d1.ratio > 14 ? '#e74c3c' : '#27ae60',
+                        d2.ratio > 14 ? '#e74c3c' : '#27ae60'
+                    ]
+                }]
+            },
+            options: { responsive: true }
+        });
+    }
+</script>
+
+</body>
+</html>

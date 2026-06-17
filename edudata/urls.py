@@ -22,6 +22,7 @@ from dashboard import views as dash_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('dashboard/', dash_views.index, name='dashboard'),
+    path('comparativo/', dash_views.comparativo, name='comparativo'),
     path('predecir/', pred_views.predecir, name='predecir'),
     path('', dash_views.index, name='home'),
 ]
