@@ -18,9 +18,13 @@ from django.contrib import admin
 from django.urls import path
 from prediccion import views as pred_views
 from dashboard import views as dash_views
+from usuarios import views as user_views
+from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('login/', user_views.login_view, name='login'),
+    path('logout/', user_views.logout_view, name='logout'),
     path('dashboard/', dash_views.index, name='dashboard'),
     path('comparativo/', dash_views.comparativo, name='comparativo'),
     path('predecir/', pred_views.predecir, name='predecir'),

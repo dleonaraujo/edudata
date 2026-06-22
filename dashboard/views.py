@@ -1,8 +1,18 @@
 from django.shortcuts import render
 from datos.models import IndicadorDistrito
+from django.contrib.auth.decorators import login_required, user_passes_test
+from usuarios.models import Perfil
 import json
 
 
+def es_administrador(user):
+    try:
+        return user.perfil.rol == 'administrador'
+    except Perfil.DoesNotExist:
+        return False
+
+
+@login_required
 def index(request):
     datos_2025 = IndicadorDistrito.objects.filter(anio=2025).order_by('provincia')
     provincias = [d.provincia for d in datos_2025]
@@ -34,10 +44,10 @@ def index(request):
     }
     return render(request, 'dashboard/index.html', context)
 
-def comparativo(request):
-    from datos.models import IndicadorDistrito
-    import json
 
+@login_required
+@user_passes_test(es_administrador, login_url='/dashboard/')
+def comparativo(request):
     todos = IndicadorDistrito.objects.all().values(
         'provincia', 'anio', 'total_alumnos', 
         'total_docentes', 'ratio_alumno_docente'
