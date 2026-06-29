@@ -35,7 +35,7 @@ def index(request):
         'total_provincias': len(provincias),
         'total_alumnos': sum(matriculas),
         'total_docentes': sum([d.total_docentes for d in datos_2025]),
-        'ratio_promedio': round(sum(ratios) / len(ratios), 2),
+        'ratio_promedio': round(sum(ratios) / len(ratios), 2) if ratios else 0,
         'provincias_json': json.dumps(provincias),
         'matriculas_json': json.dumps(matriculas),
         'ratios_json': json.dumps(ratios),
@@ -46,7 +46,7 @@ def index(request):
 
 
 @login_required
-@user_passes_test(es_administrador, login_url='/dashboard/')
+# @user_passes_test(es_administrador, login_url='/dashboard/')
 def comparativo(request):
     todos = IndicadorDistrito.objects.all().values(
         'provincia', 'anio', 'total_alumnos', 
