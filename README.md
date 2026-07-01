@@ -30,17 +30,18 @@ EduData procesa datos del portal ESCALE del MINEDU (2022-2025) de las 8 provinci
 ---
 
 ##  Estructura del Proyecto
+
+```
 edudata/
-├── dashboard/          # Dashboard con gráficos Chart.js
+├── dashboard/ # Dashboard con gráficos Chart.js
+├── migrations       
 ├── prediccion/         # Motor de predicción Random Forest + pruebas
 ├── datos/              # Modelos ORM, ETL MINEDU + pruebas ETL
 ├── usuarios/           # Autenticación y roles
 ├── templates/          # Templates HTML
-├── static/             # CSS y JS
 ├── ml/                 # Modelo entrenado (.pkl)
-├── data/               # CSV de datos MINEDU
 └── manage.py
----
+```
 
 ##  Instalación y Configuración
 
