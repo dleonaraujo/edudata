@@ -30,7 +30,16 @@ EduData procesa datos del portal ESCALE del MINEDU (2022-2025) de las 8 provinci
 ---
 
 ##  Estructura del Proyecto
-
+edudata/
+├── dashboard/          # Dashboard con gráficos Chart.js
+├── prediccion/         # Motor de predicción Random Forest + pruebas
+├── datos/              # Modelos ORM, ETL MINEDU + pruebas ETL
+├── usuarios/           # Autenticación y roles
+├── templates/          # Templates HTML
+├── static/             # CSS y JS
+├── ml/                 # Modelo entrenado (.pkl)
+├── data/               # CSV de datos MINEDU
+└── manage.py
 ---
 
 ##  Instalación y Configuración
@@ -56,13 +65,15 @@ pip install -r requirements.txt
 ### 4. Configurar variables de entorno
 Crea un archivo `.env` en la raíz del proyecto:
 ```env
-SECRET_KEY=tu-secret-key
+SECRET_KEY=123456
 DEBUG=True
 DB_NAME=postgres
-DB_USER=postgres
-DB_PASSWORD=tu-password
-DB_HOST=db.xxxx.supabase.co
-DB_PORT=5432
+DB_USER=postgres.jagbmjqbqpxvfjapbbkq
+DB_PASSWORD=Comxs.tecno$2026
+DB_HOST=aws-1-sa-east-1.pooler.supabase.com
+DB_PORT=6543
+
+
 ```
 
 ### 5. Ejecutar migraciones
